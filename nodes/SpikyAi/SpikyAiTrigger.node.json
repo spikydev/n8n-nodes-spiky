@@ -1,0 +1,14 @@
+{
+	"node": "n8n-nodes-spiky.spikyAiTrigger",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Productivity"],
+	"resources": {
+		"primaryDocumentation": [
+			{
+				"url": "https://spiky.ai"
+			}
+		]
+	},
+	"alias": ["meeting", "analysis", "spiky", "webhook"]
+}
