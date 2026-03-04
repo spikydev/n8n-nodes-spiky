@@ -8,25 +8,18 @@ describe('spikyApiRequest', () => {
 		corePlatformBaseUrl?: string;
 		platformBaseUrl?: string;
 		idToken?: string | undefined;
-		accessToken?: string;
 	} = {}) {
 		const {
 			corePlatformBaseUrl = 'https://core.example.com/prod',
 			platformBaseUrl = 'https://platform.example.com/prod',
 			idToken = 'test-id-token',
-			accessToken = 'test-access-token',
 		} = overrides;
-
-		const oauthTokenData: Record<string, unknown> = { access_token: accessToken };
-		if (idToken !== undefined) {
-			oauthTokenData.id_token = idToken;
-		}
 
 		return {
 			getCredentials: jest.fn().mockResolvedValue({
 				corePlatformBaseUrl,
 				platformBaseUrl,
-				oauthTokenData,
+				idToken,
 			}),
 			getNode: jest.fn().mockReturnValue({ name: 'TestNode' }),
 			helpers: { httpRequest: mockHttpRequest },
@@ -95,15 +88,21 @@ describe('spikyApiRequest', () => {
 			);
 		});
 
-		it('should use id_token not access_token for authorization', async () => {
-			const ctx = createContext({ idToken: 'my-id-token', accessToken: 'my-access-token' });
-			mockHttpRequest.mockResolvedValue({});
+		it('should throw when idToken is missing', async () => {
+			const ctx = {
+				getCredentials: jest.fn().mockResolvedValue({
+					corePlatformBaseUrl: 'https://core.example.com/prod',
+					platformBaseUrl: 'https://platform.example.com/prod',
+				}),
+				getNode: jest.fn().mockReturnValue({ name: 'TestNode' }),
+				helpers: { httpRequest: mockHttpRequest },
+				logger: mockLogger,
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			} as any;
 
-			await spikyApiRequest.call(ctx, 'POST', '/n8n/subscription', 'corePlatform');
-
-			const headers = mockHttpRequest.mock.calls[0][0].headers;
-			expect(headers.Authorization).toBe('Bearer my-id-token');
-			expect(headers.Authorization).not.toContain('my-access-token');
+			await expect(
+				spikyApiRequest.call(ctx, 'POST', '/n8n/subscription', 'corePlatform'),
+			).rejects.toThrow('No id_token found in credentials');
 		});
 	});
 

@@ -15,7 +15,7 @@ function createMockContext(params: Record<string, unknown> = {}) {
 		getCredentials: jest.fn().mockResolvedValue({
 			corePlatformBaseUrl: 'https://core.example.com/prod',
 			platformBaseUrl: 'https://platform.example.com/prod',
-			oauthTokenData: { id_token: 'test-token' },
+			idToken: 'test-token',
 		}),
 		getNode: jest.fn().mockReturnValue({ name: 'TestNode' }),
 		helpers: { httpRequest: jest.fn() },

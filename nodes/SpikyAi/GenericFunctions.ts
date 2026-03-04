@@ -18,15 +18,14 @@ export async function spikyApiRequest(
 	body?: IDataObject,
 	qs?: IDataObject,
 ): Promise<IDataObject | IDataObject[]> {
-	const credentials = await this.getCredentials('spikyAiOAuth2Api');
+	const credentials = await this.getCredentials('spikyAiApi');
 
 	const fieldName = baseUrlKey === 'corePlatform' ? 'corePlatformBaseUrl' : 'platformBaseUrl';
 	const baseUrl = (credentials[fieldName] as string).replace(/\/+$/, '');
 
-	const oauthTokenData = credentials.oauthTokenData as IDataObject | undefined;
-	const idToken = oauthTokenData?.id_token as string | undefined;
+	const idToken = credentials.idToken as string | undefined;
 	if (!idToken) {
-		throw new NodeOperationError(this.getNode(), 'No id_token found in OAuth credentials');
+		throw new NodeOperationError(this.getNode(), 'No id_token found in credentials');
 	}
 
 	const url = `${baseUrl}${endpoint}`;

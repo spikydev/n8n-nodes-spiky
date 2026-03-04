@@ -24,11 +24,11 @@ This is an **n8n community node package** following the [n8n node development co
 
 ### Key files
 
-- `credentials/SpikyAiOAuth2Api.credentials.ts` — OAuth2 credential extending n8n's `oAuth2Api` base. Authenticates via AWS Cognito using `id_token` (not `access_token`) in the Authorization header.
+- `credentials/SpikyAiApi.credentials.ts` — Credential using `preAuthentication` pattern. Authenticates via spiky-backend's `/api/v1/auth/login` endpoint. Stores `idToken` (expirable) and `refreshToken`. Tries token refresh first, falls back to full login.
 - `nodes/SpikyAi/SpikyAi.node.ts` — Action node entry point. Imports operation descriptions, routes `execute()` to operation handlers via a dispatch map.
-- `nodes/SpikyAi/operations/getCurrentUser.ts` — Get Current User operation (description + execute).
+- `nodes/SpikyAi/operations/getCurrentUser.ts` — Get Current User operation. Decodes JWT claims from `idToken`.
 - `nodes/SpikyAi/operations/uploadRecording.ts` — Upload Recording operation. Orchestrates 4 API calls: calculate chunks → resolve tags → create meeting report → upload recording.
-- `nodes/SpikyAi/GenericFunctions.ts` — Shared `spikyApiRequest()` helper. Uses `id_token` from credentials, supports two base URLs (`corePlatform` and `platform`).
+- `nodes/SpikyAi/GenericFunctions.ts` — Shared `spikyApiRequest()` helper. Uses `idToken` from credentials, supports two base URLs (`corePlatform` and `platform`).
 - `nodes/SpikyAi/SpikyAiTrigger.node.ts` — Webhook trigger node for meeting analysis completion.
 
 ### n8n node patterns
@@ -36,8 +36,8 @@ This is an **n8n community node package** following the [n8n node development co
 - Nodes implement `INodeType` with a `description` property and an `execute` method.
 - Operations are split into separate files under `operations/`, each exporting `description` (field definitions) and `execute` (handler).
 - The main node file dispatches to the correct operation handler based on the `operation` parameter.
-- API calls use `spikyApiRequest()` from `GenericFunctions.ts` with manually extracted `id_token`.
-- The credential uses `id_token` from `oauthTokenData` (Cognito-specific), not the standard `access_token`.
+- API calls use `spikyApiRequest()` from `GenericFunctions.ts` with `idToken` extracted directly from credentials.
+- The credential uses `preAuthentication` with `expirable: true` on `idToken`. On 401, n8n automatically re-calls `preAuthentication()` which tries refresh then login.
 
 ### API body format
 
