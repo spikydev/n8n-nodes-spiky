@@ -6,7 +6,6 @@ import type {
 	IHttpRequestOptions,
 	IWebhookFunctions,
 } from 'n8n-workflow';
-import { NodeOperationError } from 'n8n-workflow';
 
 type SpikyApiContext = IExecuteFunctions | IHookFunctions | IWebhookFunctions;
 
@@ -23,20 +22,12 @@ export async function spikyApiRequest(
 	const fieldName = baseUrlKey === 'corePlatform' ? 'corePlatformBaseUrl' : 'platformBaseUrl';
 	const baseUrl = (credentials[fieldName] as string).replace(/\/+$/, '');
 
-	const idToken = credentials.idToken as string | undefined;
-	if (!idToken) {
-		throw new NodeOperationError(this.getNode(), 'No id_token found in credentials');
-	}
-
 	const url = `${baseUrl}${endpoint}`;
 
 	const options: IHttpRequestOptions = {
 		method,
 		url,
 		json: true,
-		headers: {
-			Authorization: `Bearer ${idToken}`,
-		},
 	};
 
 	if (body && Object.keys(body).length > 0) {
@@ -48,7 +39,11 @@ export async function spikyApiRequest(
 	}
 
 	try {
-		return (await this.helpers.httpRequest(options)) as IDataObject | IDataObject[];
+		return (await this.helpers.httpRequestWithAuthentication.call(
+			this,
+			'spikyAiApi',
+			options,
+		)) as IDataObject | IDataObject[];
 	} catch (error) {
 		const err = error as {
 			message?: string;
