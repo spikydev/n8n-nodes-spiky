@@ -49,7 +49,7 @@ This node uses OAuth2 to authenticate with your Spiky.ai account.
 | Operation | Description |
 |-----------|-------------|
 | Get Current User | Retrieve the authenticated user's information |
-| Upload Call Recording | Submit a recording URL for AI analysis *(coming soon)* |
+| Upload Call Recording | Submit a recording URL for AI analysis |
 
 ### Spiky AI Trigger
 

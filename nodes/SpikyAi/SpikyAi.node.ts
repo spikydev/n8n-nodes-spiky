@@ -6,6 +6,9 @@ import type {
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
+import * as getCurrentUser from './operations/getCurrentUser';
+import * as uploadRecording from './operations/uploadRecording';
+
 export class SpikyAi implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Spiky AI',
@@ -39,9 +42,17 @@ export class SpikyAi implements INodeType {
 						description: 'Get the currently authenticated user info',
 						action: 'Get the currently authenticated user info',
 					},
+					{
+						name: 'Upload Recording',
+						value: 'uploadRecording',
+						description: 'Submit a call recording URL for analysis',
+						action: 'Submit a call recording URL for analysis',
+					},
 				],
 				default: 'getCurrentUser',
 			},
+			...getCurrentUser.description,
+			...uploadRecording.description,
 		],
 	};
 
@@ -50,20 +61,20 @@ export class SpikyAi implements INodeType {
 		const returnData: INodeExecutionData[] = [];
 		const operation = this.getNodeParameter('operation', 0) as string;
 
+		const operations: Record<
+			string,
+			(ctx: IExecuteFunctions, i: number) => Promise<INodeExecutionData['json']>
+		> = {
+			getCurrentUser: getCurrentUser.execute,
+			uploadRecording: uploadRecording.execute,
+		};
+
+		const handler = operations[operation];
+
 		for (let i = 0; i < items.length; i++) {
 			try {
-				if (operation === 'getCurrentUser') {
-					const response = await this.helpers.httpRequestWithAuthentication.call(
-						this,
-						'spikyAiOAuth2Api',
-						{
-							method: 'GET',
-							url: 'https://prod-spiky-app.auth.us-east-2.amazoncognito.com/oauth2/userInfo',
-							json: true,
-						},
-					);
-					returnData.push({ json: response as INodeExecutionData['json'] });
-				}
+				const result = await handler(this, i);
+				returnData.push({ json: result });
 			} catch (error) {
 				if (this.continueOnFail()) {
 					returnData.push({ json: { error: (error as Error).message }, pairedItem: i });

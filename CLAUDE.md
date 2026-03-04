@@ -25,16 +25,23 @@ This is an **n8n community node package** following the [n8n node development co
 ### Key files
 
 - `credentials/SpikyAiOAuth2Api.credentials.ts` — OAuth2 credential extending n8n's `oAuth2Api` base. Authenticates via AWS Cognito using `id_token` (not `access_token`) in the Authorization header.
-- `nodes/SpikyAi/SpikyAi.node.ts` — Action node implementing `INodeType`. Currently supports "Get Current User" operation. Each operation processes items in a loop with `continueOnFail()` error handling.
-- `nodes/SpikyAi/SpikyAi.node.json` — Codex metadata (categories, documentation links).
-- `nodes/SpikyAi/spikyAi.svg` / `spikyAi.dark.svg` — Node icons for light/dark themes.
+- `nodes/SpikyAi/SpikyAi.node.ts` — Action node entry point. Imports operation descriptions, routes `execute()` to operation handlers via a dispatch map.
+- `nodes/SpikyAi/operations/getCurrentUser.ts` — Get Current User operation (description + execute).
+- `nodes/SpikyAi/operations/uploadRecording.ts` — Upload Recording operation. Orchestrates 4 API calls: calculate chunks → resolve tags → create meeting report → upload recording.
+- `nodes/SpikyAi/GenericFunctions.ts` — Shared `spikyApiRequest()` helper. Uses `id_token` from credentials, supports two base URLs (`corePlatform` and `platform`).
+- `nodes/SpikyAi/SpikyAiTrigger.node.ts` — Webhook trigger node for meeting analysis completion.
 
 ### n8n node patterns
 
 - Nodes implement `INodeType` with a `description` property and an `execute` method.
-- API calls use `this.helpers.httpRequestWithAuthentication` with the credential name `'spikyAiOAuth2Api'`.
-- Credentials implement `ICredentialType` and use `authenticate` for injecting auth headers into requests.
+- Operations are split into separate files under `operations/`, each exporting `description` (field definitions) and `execute` (handler).
+- The main node file dispatches to the correct operation handler based on the `operation` parameter.
+- API calls use `spikyApiRequest()` from `GenericFunctions.ts` with manually extracted `id_token`.
 - The credential uses `id_token` from `oauthTokenData` (Cognito-specific), not the standard `access_token`.
+
+### API body format
+
+The `/zapier/*` endpoints (in cdk-core-platform-stack) use `Body(embed=True)` with a parameter named `body`, so payloads must be wrapped: `{ "body": { ...actual data } }`. The `/platform/*` endpoints (in cdk-core) accept flat JSON bodies.
 
 ## Local Development
 

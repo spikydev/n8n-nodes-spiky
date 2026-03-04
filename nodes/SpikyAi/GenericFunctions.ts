@@ -51,10 +51,17 @@ export async function spikyApiRequest(
 	try {
 		return (await this.helpers.httpRequest(options)) as IDataObject | IDataObject[];
 	} catch (error) {
-		const err = error as { message?: string; statusCode?: number };
+		const err = error as {
+			message?: string;
+			statusCode?: number;
+			cause?: { response?: { data?: unknown } };
+			response?: { data?: unknown };
+		};
+		const responseBody = err.cause?.response?.data ?? err.response?.data;
 		this.logger.error(`[SpikyAI] ${method} ${url} failed`, {
 			statusCode: err.statusCode,
 			message: err.message,
+			responseBody: responseBody ? JSON.stringify(responseBody) : undefined,
 		});
 		throw error;
 	}
