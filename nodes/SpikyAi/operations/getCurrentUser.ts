@@ -21,7 +21,12 @@ export async function execute(
 		throw new NodeOperationError(context.getNode(), 'Invalid id_token format');
 	}
 
-	const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString()) as IDataObject;
+	let payload: IDataObject;
+	try {
+		payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString()) as IDataObject;
+	} catch {
+		throw new NodeOperationError(context.getNode(), 'Failed to decode id_token payload');
+	}
 
 	return {
 		sub: payload.sub,
