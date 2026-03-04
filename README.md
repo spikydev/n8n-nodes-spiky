@@ -55,7 +55,7 @@ This node uses OAuth2 to authenticate with your Spiky.ai account.
 
 | Trigger | Description |
 |---------|-------------|
-| Meeting Analysis Ready | Fires when a meeting analysis completes *(coming soon)* |
+| Meeting Analysis Ready | Fires when a meeting analysis completes |
 
 ## Compatibility
 

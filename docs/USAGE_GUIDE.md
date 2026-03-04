@@ -1,12 +1,12 @@
 # Spiky AI for n8n — Usage Guide
 
-This guide explains how to install and use the Spiky AI node in your n8n workflows.
+This guide explains how to install and use the Spiky AI nodes in your n8n workflows.
 
 ## What is Spiky AI?
 
 [Spiky.ai](https://spiky.ai) is an AI-powered meeting intelligence platform. It analyzes your sales calls, demos, and team meetings to provide summaries, transcripts, action items, and performance scores.
 
-The Spiky AI n8n node lets you automate workflows around your meeting data — for example, automatically sending meeting summaries to Slack, updating your CRM when a call is analyzed, or uploading recordings for analysis from other tools.
+The Spiky AI n8n nodes let you automate workflows around your meeting data — for example, automatically sending meeting summaries to Slack, updating your CRM when a call is analyzed, or uploading recordings for analysis from other tools.
 
 ## Installation
 
@@ -31,7 +31,7 @@ Then restart the n8n instance.
 
 ## Connecting Your Spiky Account
 
-Before using the Spiky AI node, you need to connect your Spiky account.
+Before using the Spiky AI nodes, you need to connect your Spiky account.
 
 ### Step 1: Get your credentials
 
@@ -47,7 +47,8 @@ These are used to securely connect n8n to your Spiky account.
 2. Click **Add Credential**
 3. Search for **Spiky AI OAuth2 API**
 4. Enter the **Client ID** and **Client Secret**
-5. Click the **Connect** button
+5. The **Core Platform API Base URL** and **Platform API Base URL** fields are pre-filled with production defaults. Only change these if connecting to a non-production Spiky environment.
+6. Click the **Connect** button
 
 ### Step 3: Sign in
 
@@ -58,55 +59,46 @@ After clicking Connect, a login page will open in your browser:
 3. You'll be redirected back to n8n
 4. The credential should now show as **Connected**
 
-## Using the Spiky AI Node
+> **Note:** You must have a **COMPANY_ADMIN** or **SUPER_ADMIN** role in Spiky to use the trigger node. Regular users can use the action node (Get Current User).
 
-### Adding the Node to a Workflow
+## Available Nodes
 
-1. Open or create a workflow
-2. Click the **+** button to add a node
-3. Search for **Spiky AI**
-4. Click to add it to your workflow
+This package provides two nodes:
 
-### Available Operations
+| Node | Type | Description |
+|------|------|-------------|
+| **Spiky AI** | Action | Perform operations like getting user info or uploading recordings |
+| **Spiky AI Trigger** | Trigger | Automatically starts a workflow when a meeting analysis completes |
 
-#### Get Current User
+See the individual node guides for details:
+- [Spiky AI (Action Node)](./nodes/SpikyAi.md)
+- [Spiky AI Trigger](./nodes/SpikyAiTrigger.md)
 
-Retrieves information about the authenticated user. Useful for testing that your connection is working.
+## Example Workflows
 
-**How to use:**
-1. Add the Spiky AI node
-2. Select **Get Current User** as the operation
-3. Click **Test step** to verify
+### Post meeting summaries to Slack
 
-#### Upload Call Recording *(Coming Soon)*
+**Spiky AI Trigger** → **Slack** (Send Message)
 
-Submit a call recording URL for AI-powered analysis by Spiky.
+When any meeting analysis completes, post the brief summary and action items to a Slack channel.
 
-**Inputs:**
-- **Recording URL** (required) — A public URL to the recording file (e.g., from Google Drive, S3, or Dropbox)
-- **Meeting Name** (required) — A title for the meeting
-- **Meeting Date** (optional) — When the meeting took place (defaults to now)
-- **Tags** (optional) — Comma-separated tags for organizing (max 3)
+### Update CRM after every call
 
-### Spiky AI Trigger *(Coming Soon)*
+**Spiky AI Trigger** → **HubSpot** (Create Note)
 
-The trigger node starts your workflow automatically when a meeting analysis is ready.
+Automatically create a CRM note with the meeting summary, participants, and Spiky score.
 
-**What it provides:**
-- Meeting name and date
-- Brief and detailed summaries
-- Full transcript
-- Participant list (internal and external)
-- Action items
-- Spiky score (0-100 quality metric)
-- Links to the meeting report
-- CRM deal and company IDs
+### Track action items in Notion
 
-**Example workflows:**
-- When a meeting is analyzed → Post summary to a Slack channel
-- When a meeting is analyzed → Create a note in HubSpot
-- When a meeting is analyzed → Add action items to Notion
-- When a meeting is analyzed → Send follow-up email via Gmail
+**Spiky AI Trigger** → **Notion** (Create Page)
+
+Create a Notion page for each meeting with action items and assignees.
+
+### Send follow-up emails
+
+**Spiky AI Trigger** → **Gmail** (Send Email)
+
+Email external participants a summary and action items after the call.
 
 ## Troubleshooting
 
@@ -115,6 +107,11 @@ The trigger node starts your workflow automatically when a meeting analysis is r
 - Make sure you entered the correct Client ID and Client Secret
 - Try disconnecting and reconnecting the credential
 - Verify your Spiky account is active
+
+### "Authorization failed" error
+
+- Ensure your Spiky account has **COMPANY_ADMIN** or **SUPER_ADMIN** role (required for the trigger node)
+- Try reconnecting the credential to get a fresh token
 
 ### Node not found in search
 
@@ -127,6 +124,12 @@ The trigger node starts your workflow automatically when a meeting analysis is r
 - Check your internet connection
 - Try clearing your browser cache
 - If using a corporate network, check that `*.amazoncognito.com` is not blocked
+
+### Trigger webhook not receiving events
+
+- Ensure the workflow is **activated** (toggled on), not just published
+- If using self-hosted n8n behind a firewall, the Spiky backend needs to reach your n8n webhook URL. Consider using a reverse proxy or tunnel.
+- Check that the webhook URL was registered by looking at your n8n logs for `POST /n8n/subscription` calls
 
 ## Need Help?
 

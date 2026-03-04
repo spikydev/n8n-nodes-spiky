@@ -14,6 +14,22 @@ export class SpikyAiOAuth2Api implements ICredentialType {
 
 	properties: INodeProperties[] = [
 		{
+			displayName: 'Core Platform API Base URL',
+			name: 'corePlatformBaseUrl',
+			type: 'string',
+			default: 'https://n86lv9o68k.execute-api.us-east-2.amazonaws.com/prod',
+			description:
+				'Base URL for the Spiky Core Platform API (webhook subscriptions). Only change this for non-production environments.',
+		},
+		{
+			displayName: 'Platform API Base URL',
+			name: 'platformBaseUrl',
+			type: 'string',
+			default: 'https://btrh2q3utg.execute-api.us-east-2.amazonaws.com/prod',
+			description:
+				'Base URL for the Spiky Platform API (meeting reports). Only change this for non-production environments.',
+		},
+		{
 			displayName: 'Grant Type',
 			name: 'grantType',
 			type: 'hidden',
