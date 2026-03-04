@@ -38,7 +38,7 @@
 		"n8nNodesApiVersion": 1,
 		"strict": true,
 		"credentials": [
-			"dist/credentials/SpikyAiOAuth2Api.credentials.js"
+			"dist/credentials/SpikyAiApi.credentials.js"
 		],
 		"nodes": [
 			"dist/nodes/SpikyAi/SpikyAi.node.js",

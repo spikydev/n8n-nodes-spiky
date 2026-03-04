@@ -26,7 +26,7 @@ export class SpikyAiTrigger implements INodeType {
 		usableAsTool: true,
 		credentials: [
 			{
-				name: 'spikyAiOAuth2Api',
+				name: 'spikyAiApi',
 				required: true,
 			},
 		],

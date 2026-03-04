@@ -1,53 +1,44 @@
 import { spikyApiRequest } from '../nodes/SpikyAi/GenericFunctions';
 
 describe('spikyApiRequest', () => {
-	const mockHttpRequest = jest.fn();
+	const mockHttpRequestWithAuthentication = jest.fn();
 	const mockLogger = { error: jest.fn(), debug: jest.fn() };
 
 	function createContext(overrides: {
 		corePlatformBaseUrl?: string;
 		platformBaseUrl?: string;
-		idToken?: string | undefined;
-		accessToken?: string;
 	} = {}) {
 		const {
 			corePlatformBaseUrl = 'https://core.example.com/prod',
 			platformBaseUrl = 'https://platform.example.com/prod',
-			idToken = 'test-id-token',
-			accessToken = 'test-access-token',
 		} = overrides;
-
-		const oauthTokenData: Record<string, unknown> = { access_token: accessToken };
-		if (idToken !== undefined) {
-			oauthTokenData.id_token = idToken;
-		}
 
 		return {
 			getCredentials: jest.fn().mockResolvedValue({
 				corePlatformBaseUrl,
 				platformBaseUrl,
-				oauthTokenData,
 			}),
 			getNode: jest.fn().mockReturnValue({ name: 'TestNode' }),
-			helpers: { httpRequest: mockHttpRequest },
+			helpers: { httpRequestWithAuthentication: mockHttpRequestWithAuthentication },
 			logger: mockLogger,
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	} as any;
+		} as any;
 	}
 
 	beforeEach(() => {
-		mockHttpRequest.mockReset();
+		mockHttpRequestWithAuthentication.mockReset();
 		mockLogger.error.mockReset();
 	});
 
 	describe('URL construction', () => {
 		it('should use corePlatformBaseUrl for corePlatform baseUrlKey', async () => {
 			const ctx = createContext({ corePlatformBaseUrl: 'https://core-api.example.com/prod' });
-			mockHttpRequest.mockResolvedValue({});
+			mockHttpRequestWithAuthentication.mockResolvedValue({});
 
 			await spikyApiRequest.call(ctx, 'POST', '/n8n/subscription', 'corePlatform');
 
-			expect(mockHttpRequest).toHaveBeenCalledWith(
+			expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith(
+				'spikyAiApi',
 				expect.objectContaining({
 					url: 'https://core-api.example.com/prod/n8n/subscription',
 				}),
@@ -56,11 +47,12 @@ describe('spikyApiRequest', () => {
 
 		it('should use platformBaseUrl for platform baseUrlKey', async () => {
 			const ctx = createContext({ platformBaseUrl: 'https://platform-api.example.com/prod' });
-			mockHttpRequest.mockResolvedValue([]);
+			mockHttpRequestWithAuthentication.mockResolvedValue([]);
 
 			await spikyApiRequest.call(ctx, 'GET', '/platform/n8n/meeting-report', 'platform');
 
-			expect(mockHttpRequest).toHaveBeenCalledWith(
+			expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith(
+				'spikyAiApi',
 				expect.objectContaining({
 					url: 'https://platform-api.example.com/prod/platform/n8n/meeting-report',
 				}),
@@ -69,11 +61,12 @@ describe('spikyApiRequest', () => {
 
 		it('should strip trailing slashes from base URL', async () => {
 			const ctx = createContext({ corePlatformBaseUrl: 'https://api.example.com/prod///' });
-			mockHttpRequest.mockResolvedValue({});
+			mockHttpRequestWithAuthentication.mockResolvedValue({});
 
 			await spikyApiRequest.call(ctx, 'POST', '/n8n/subscription', 'corePlatform');
 
-			expect(mockHttpRequest).toHaveBeenCalledWith(
+			expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith(
+				'spikyAiApi',
 				expect.objectContaining({
 					url: 'https://api.example.com/prod/n8n/subscription',
 				}),
@@ -82,73 +75,74 @@ describe('spikyApiRequest', () => {
 	});
 
 	describe('authentication', () => {
-		it('should set Authorization header with id_token', async () => {
-			const ctx = createContext({ idToken: 'my-cognito-id-token' });
-			mockHttpRequest.mockResolvedValue({});
+		it('should use httpRequestWithAuthentication with spikyAiApi credential', async () => {
+			const ctx = createContext();
+			mockHttpRequestWithAuthentication.mockResolvedValue({});
 
 			await spikyApiRequest.call(ctx, 'POST', '/n8n/subscription', 'corePlatform');
 
-			expect(mockHttpRequest).toHaveBeenCalledWith(
-				expect.objectContaining({
-					headers: { Authorization: 'Bearer my-cognito-id-token' },
-				}),
+			expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith(
+				'spikyAiApi',
+				expect.any(Object),
 			);
 		});
 
-		it('should use id_token not access_token for authorization', async () => {
-			const ctx = createContext({ idToken: 'my-id-token', accessToken: 'my-access-token' });
-			mockHttpRequest.mockResolvedValue({});
+		it('should not set Authorization header manually', async () => {
+			const ctx = createContext();
+			mockHttpRequestWithAuthentication.mockResolvedValue({});
 
 			await spikyApiRequest.call(ctx, 'POST', '/n8n/subscription', 'corePlatform');
 
-			const headers = mockHttpRequest.mock.calls[0][0].headers;
-			expect(headers.Authorization).toBe('Bearer my-id-token');
-			expect(headers.Authorization).not.toContain('my-access-token');
+			const options = mockHttpRequestWithAuthentication.mock.calls[0][1];
+			expect(options.headers).toBeUndefined();
 		});
 	});
 
 	describe('request options', () => {
 		it('should include body when provided', async () => {
 			const ctx = createContext();
-			mockHttpRequest.mockResolvedValue({});
+			mockHttpRequestWithAuthentication.mockResolvedValue({});
 			const body = { hookUrl: 'https://n8n.example.com/webhook' };
 
 			await spikyApiRequest.call(ctx, 'POST', '/n8n/subscription', 'corePlatform', body);
 
-			expect(mockHttpRequest).toHaveBeenCalledWith(
+			expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith(
+				'spikyAiApi',
 				expect.objectContaining({ body }),
 			);
 		});
 
 		it('should not include body when empty', async () => {
 			const ctx = createContext();
-			mockHttpRequest.mockResolvedValue({});
+			mockHttpRequestWithAuthentication.mockResolvedValue({});
 
 			await spikyApiRequest.call(ctx, 'GET', '/test', 'corePlatform', {});
 
-			const callArgs = mockHttpRequest.mock.calls[0][0];
-			expect(callArgs.body).toBeUndefined();
+			const options = mockHttpRequestWithAuthentication.mock.calls[0][1];
+			expect(options.body).toBeUndefined();
 		});
 
 		it('should include query string when provided', async () => {
 			const ctx = createContext();
-			mockHttpRequest.mockResolvedValue([]);
+			mockHttpRequestWithAuthentication.mockResolvedValue([]);
 			const qs = { limit: '10' };
 
 			await spikyApiRequest.call(ctx, 'GET', '/test', 'platform', undefined, qs);
 
-			expect(mockHttpRequest).toHaveBeenCalledWith(
+			expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith(
+				'spikyAiApi',
 				expect.objectContaining({ qs }),
 			);
 		});
 
 		it('should set json: true', async () => {
 			const ctx = createContext();
-			mockHttpRequest.mockResolvedValue({});
+			mockHttpRequestWithAuthentication.mockResolvedValue({});
 
 			await spikyApiRequest.call(ctx, 'GET', '/test', 'corePlatform');
 
-			expect(mockHttpRequest).toHaveBeenCalledWith(
+			expect(mockHttpRequestWithAuthentication).toHaveBeenCalledWith(
+				'spikyAiApi',
 				expect.objectContaining({ json: true }),
 			);
 		});
@@ -158,7 +152,7 @@ describe('spikyApiRequest', () => {
 		it('should log and rethrow on HTTP failure', async () => {
 			const ctx = createContext();
 			const error = Object.assign(new Error('Unauthorized'), { statusCode: 401 });
-			mockHttpRequest.mockRejectedValue(error);
+			mockHttpRequestWithAuthentication.mockRejectedValue(error);
 
 			await expect(
 				spikyApiRequest.call(ctx, 'POST', '/n8n/subscription', 'corePlatform'),
