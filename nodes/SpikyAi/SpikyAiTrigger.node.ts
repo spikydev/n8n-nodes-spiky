@@ -9,12 +9,13 @@ import type {
 import { NodeConnectionTypes } from 'n8n-workflow';
 
 import { spikyApiRequest } from './GenericFunctions';
+import { SPIKY_ICON } from './icons';
 
 export class SpikyAiTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Spiky AI Trigger',
 		name: 'spikyAiTrigger',
-		icon: { light: 'file:spikyAi.svg', dark: 'file:spikyAi.dark.svg' },
+		icon: SPIKY_ICON,
 		group: ['trigger'],
 		version: [1],
 		description: 'Triggers when a meeting analysis is ready in Spiky AI',

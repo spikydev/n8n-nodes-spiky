@@ -7,10 +7,12 @@ import type {
 	INodeProperties,
 } from 'n8n-workflow';
 
+import { SPIKY_ICON } from '../nodes/SpikyAi/icons';
+
 export class SpikyAiApi implements ICredentialType {
 	name = 'spikyAiApi';
 	displayName = 'Spiky AI API';
-	icon = { light: 'file:spikyAi.svg', dark: 'file:spikyAi.dark.svg' } as const;
+	icon = SPIKY_ICON;
 	documentationUrl = 'https://spiky.ai';
 
 	properties: INodeProperties[] = [
