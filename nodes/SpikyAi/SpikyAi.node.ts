@@ -8,12 +8,13 @@ import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 import * as getCurrentUser from './operations/getCurrentUser';
 import * as uploadRecording from './operations/uploadRecording';
+import { SPIKY_ICON } from './icons';
 
 export class SpikyAi implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Spiky AI',
 		name: 'spikyAi',
-		icon: { light: 'file:spikyAi.svg', dark: 'file:spikyAi.dark.svg' },
+		icon: SPIKY_ICON,
 		group: ['input'],
 		version: [1],
 		description: 'Interact with Spiky AI meeting intelligence platform',

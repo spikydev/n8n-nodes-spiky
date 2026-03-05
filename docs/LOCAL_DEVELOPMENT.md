@@ -6,8 +6,7 @@ This guide walks you through setting up a local development environment for the 
 
 - [Node.js](https://nodejs.org/) >= 22.0.0
 - [Docker](https://www.docker.com/) (for running n8n locally)
-- A [Spiky.ai](https://spiky.ai) account
-- OAuth2 Client ID and Client Secret for the Spiky n8n app client
+- A [Spiky.ai](https://spiky.ai) account with email/password login
 
 ## Initial Setup
 
@@ -62,10 +61,9 @@ On first launch, n8n will ask you to create a local owner account (email + passw
 1. In n8n, create a new workflow
 2. Add a node and search for **Spiky AI**
 3. Click on the node, then click **Create New Credential**
-4. Enter the **Client ID** and **Client Secret** from the Cognito app client
-5. Click **Connect** — you'll be redirected to the Spiky login page
-6. Sign in with your existing Spiky account
-7. You'll be redirected back to n8n with a connected credential
+4. Enter your Spiky **Email** and **Password**
+5. The **Cognito Client ID** and API base URLs are pre-filled with production defaults. For dev/staging, override them accordingly.
+6. Click **Save** and then **Test** to verify the connection
 
 ### 4. Test the connection
 
@@ -95,11 +93,13 @@ On first launch, n8n will ask you to create a local owner account (email + passw
 ```
 n8n-nodes-spiky/
 ├── credentials/
-│   └── SpikyAiOAuth2Api.credentials.ts   # OAuth2 credential (Cognito)
+│   └── SpikyAiApi.credentials.ts         # preAuthentication credential
 ├── nodes/
 │   └── SpikyAi/
-│       ├── SpikyAi.node.ts               # Action node
-│       ├── SpikyAi.node.json             # Node metadata
+│       ├── SpikyAi.node.ts               # Action node (router)
+│       ├── SpikyAiTrigger.node.ts        # Trigger node (webhook)
+│       ├── GenericFunctions.ts            # Shared API helpers
+│       ├── operations/                    # Operation handlers
 │       ├── spikyAi.svg                   # Icon (light mode)
 │       └── spikyAi.dark.svg              # Icon (dark mode)
 ├── docs/                                  # Documentation
@@ -117,9 +117,11 @@ n8n-nodes-spiky/
 - Verify the `N8N_CUSTOM_EXTENSIONS` path points to the correct directory
 - Restart the Docker container after rebuilding
 
-### OAuth2 "redirect_uri_mismatch" error
+### Credential test returns "Invalid email or password"
 
-- Ensure `http://localhost:5678/rest/oauth2-credential/callback` is registered as a callback URL in the Cognito app client
+- Verify your email/password works on [app.spiky.ai](https://app.spiky.ai)
+- SSO-only users (Google/Microsoft/Apple login) must set a password first via Spiky settings
+- Check that the Cognito Client ID is correct (production default: `215131dkhgebjfevrn9k5ql61r`)
 
 ### Changes not reflected after rebuild
 
