@@ -190,6 +190,8 @@ async function resolveTags(
 		'GET',
 		'/platform/tags',
 		'platform',
+		undefined,
+		{ populateMeetingData: 'false' },
 	)) as IDataObject[];
 
 	const tagIds: string[] = [];
