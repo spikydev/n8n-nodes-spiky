@@ -154,6 +154,9 @@ export class SpikyAiApi implements ICredentialType {
 		request: {
 			baseURL: '={{$credentials?.platformBaseUrl}}',
 			url: '/platform/tags',
+			qs: {
+				populateMeetingData: 'false',
+			},
 		},
 	};
 }
