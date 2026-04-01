@@ -15,6 +15,7 @@
 	],
 	"author": {
 		"name": "Spiky.ai",
+		"email": "admin@spiky.ai",
 		"url": "https://spiky.ai"
 	},
 	"repository": {
@@ -46,7 +47,7 @@
 		]
 	},
 	"devDependencies": {
-		"@n8n/node-cli": "*",
+		"@n8n/node-cli": "^0.23.1",
 		"@types/jest": "^30.0.0",
 		"eslint": "9.32.0",
 		"jest": "^30.2.0",

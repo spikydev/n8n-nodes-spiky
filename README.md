@@ -26,21 +26,20 @@ Then restart your n8n instance.
 
 ## Credentials
 
-This node uses OAuth2 to authenticate with your Spiky.ai account.
+This node authenticates with your Spiky.ai account using email and password.
 
 ### Prerequisites
 
-- A [Spiky.ai](https://spiky.ai) account
-- OAuth2 Client ID and Client Secret (contact Spiky.ai support or your admin)
+- A [Spiky.ai](https://spiky.ai) account with email/password login
+- SSO-only users (Google/Microsoft/Apple) must set a password first via Spiky settings
 
 ### Setup
 
 1. In n8n, go to **Credentials > New Credential**
-2. Search for **Spiky AI OAuth2 API**
-3. Enter your **Client ID** and **Client Secret**
-4. Click **Connect** — you'll be redirected to the Spiky login page
-5. Sign in with your Spiky account credentials
-6. After successful authentication, you'll be redirected back to n8n
+2. Search for **Spiky AI API**
+3. Enter your **Email** and **Password**
+4. Click **Test** to verify the connection
+5. The node automatically handles token refresh — no manual re-authentication needed
 
 ## Operations
 
