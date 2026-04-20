@@ -84,10 +84,14 @@ export class SpikyAiTrigger implements INodeType {
 						'corePlatform',
 						{ hookUrl },
 					);
-				} catch {
+				} catch (error) {
 					// Best-effort cleanup. If the backend is unreachable
 					// or the hook was already removed, don't block
-					// deactivation.
+					// deactivation — but surface the failure so operators
+					// can diagnose stale subscriptions.
+					this.logger.warn('Failed to remove Spiky webhook', {
+						error: (error as Error).message,
+					});
 				}
 
 				delete staticData.hookUrl;

@@ -83,11 +83,10 @@ export async function execute(
 			{ body: { record_url: recordingUrl } } as IDataObject,
 		)) as IDataObject;
 	} catch (error) {
-		throw new NodeOperationError(
-			context.getNode(),
-			`Step 1/4 failed: calculate_call_chunks — ${(error as Error).message}`,
-			{ itemIndex },
-		);
+		throw new NodeOperationError(context.getNode(), error as Error, {
+			itemIndex,
+			description: 'Step 1/4 failed: calculate_call_chunks',
+		});
 	}
 
 	const parts = chunkResponse.parts as number;
@@ -97,11 +96,10 @@ export async function execute(
 	try {
 		tagIds = await resolveTags(context, tagsRaw);
 	} catch (error) {
-		throw new NodeOperationError(
-			context.getNode(),
-			`Step 2/4 failed: resolve tags — ${(error as Error).message}`,
-			{ itemIndex },
-		);
+		throw new NodeOperationError(context.getNode(), error as Error, {
+			itemIndex,
+			description: 'Step 2/4 failed: resolve tags',
+		});
 	}
 
 	// Step 3: Create meeting report (returns pre-signed S3 upload URLs)
@@ -126,11 +124,10 @@ export async function execute(
 			meetingBody,
 		)) as IDataObject;
 	} catch (error) {
-		throw new NodeOperationError(
-			context.getNode(),
-			`Step 3/4 failed: create meeting report — ${(error as Error).message}`,
-			{ itemIndex },
-		);
+		throw new NodeOperationError(context.getNode(), error as Error, {
+			itemIndex,
+			description: 'Step 3/4 failed: create meeting report',
+		});
 	}
 
 	const meetingAnalysis = meetingResponse.meetingAnalysis as IDataObject;
@@ -151,11 +148,10 @@ export async function execute(
 			} as IDataObject,
 		);
 	} catch (error) {
-		throw new NodeOperationError(
-			context.getNode(),
-			`Step 4/4 failed: upload call recording — ${(error as Error).message}`,
-			{ itemIndex },
-		);
+		throw new NodeOperationError(context.getNode(), error as Error, {
+			itemIndex,
+			description: 'Step 4/4 failed: upload call recording',
+		});
 	}
 
 	return {
