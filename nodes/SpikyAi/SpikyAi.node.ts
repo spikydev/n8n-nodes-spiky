@@ -21,6 +21,7 @@ export class SpikyAi implements INodeType {
 		defaults: {
 			name: 'Spiky AI',
 		},
+		subtitle: '={{$parameter["operation"]}}',
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
 		usableAsTool: true,
