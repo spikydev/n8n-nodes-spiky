@@ -5,7 +5,9 @@ import type {
 	IHttpRequestMethods,
 	IHttpRequestOptions,
 	IWebhookFunctions,
+	JsonObject,
 } from 'n8n-workflow';
+import { NodeApiError } from 'n8n-workflow';
 
 type SpikyApiContext = IExecuteFunctions | IHookFunctions | IWebhookFunctions;
 
@@ -57,6 +59,6 @@ export async function spikyApiRequest(
 			message: err.message,
 			responseBody: responseBody ? JSON.stringify(responseBody) : undefined,
 		});
-		throw error;
+		throw new NodeApiError(this.getNode(), error as JsonObject);
 	}
 }
