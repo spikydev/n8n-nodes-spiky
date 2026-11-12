@@ -18,13 +18,13 @@ export class SpikyAiTrigger implements INodeType {
 		icon: SPIKY_ICON,
 		group: ['trigger'],
 		version: [1],
+		subtitle: 'On meeting analysis ready',
 		description: 'Triggers when a meeting analysis is ready in Spiky AI',
 		defaults: {
 			name: 'Spiky AI Trigger',
 		},
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
-		usableAsTool: true,
 		credentials: [
 			{
 				name: 'spikyAiApi',

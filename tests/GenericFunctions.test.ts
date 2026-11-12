@@ -1,3 +1,5 @@
+import { NodeApiError } from 'n8n-workflow';
+
 import { spikyApiRequest } from '../nodes/SpikyAi/GenericFunctions';
 
 describe('spikyApiRequest', () => {
@@ -154,9 +156,11 @@ describe('spikyApiRequest', () => {
 			const error = Object.assign(new Error('Unauthorized'), { statusCode: 401 });
 			mockHttpRequestWithAuthentication.mockRejectedValue(error);
 
-			await expect(
+			const rejection = expect(
 				spikyApiRequest.call(ctx, 'POST', '/n8n/subscription', 'corePlatform'),
-			).rejects.toThrow('Unauthorized');
+			).rejects;
+			await rejection.toBeInstanceOf(NodeApiError);
+			await rejection.toMatchObject({ httpCode: '401' });
 
 			expect(mockLogger.error).toHaveBeenCalledWith(
 				expect.stringContaining('POST'),

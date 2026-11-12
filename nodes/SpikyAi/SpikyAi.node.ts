@@ -76,10 +76,13 @@ export class SpikyAi implements INodeType {
 		for (let i = 0; i < items.length; i++) {
 			try {
 				const result = await handler(this, i);
-				returnData.push({ json: result });
+				returnData.push({ json: result, pairedItem: { item: i } });
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ json: { error: (error as Error).message }, pairedItem: i });
+					returnData.push({
+						json: { error: (error as Error).message },
+						pairedItem: { item: i },
+					});
 				} else {
 					throw new NodeOperationError(this.getNode(), error as Error, { itemIndex: i });
 				}
