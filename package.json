@@ -47,7 +47,7 @@
 		]
 	},
 	"devDependencies": {
-		"@n8n/node-cli": "^0.56.2",
+		"@n8n/node-cli": "^0.57.5",
 		"@types/jest": "^30.0.0",
 		"eslint": "9.32.0",
 		"jest": "^30.5.2",
